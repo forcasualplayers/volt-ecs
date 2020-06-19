@@ -8,6 +8,7 @@
 #define VOLT_TYPE_NAME_HPP_
 
 #include <string_view>
+#include <utility>
 
 namespace volt {
 template <typename T>
@@ -26,31 +27,33 @@ constexpr std::string_view type_name() noexcept;
 #define VOLT_FUNCNAME __PRETTY_FUNCTION__
 #endif
 
+#define VOLT_FALLBACK_TYPE float
+#define VOLT_XSTRINGIFY(STR) VOLT_STRINGIFY(STR)
+#define VOLT_STRINGIFY(STR) #STR
+
 namespace volt {
 namespace reflect_detail {
 template <typename T>
 constexpr std::string_view get_name(unsigned& offset, unsigned& end) noexcept;
 
-template <>
-constexpr std::string_view get_name<float>(unsigned& offset,
-                                           unsigned& end) noexcept {
-  std::string_view raw_str = VOLT_FUNCNAME;
-  offset = raw_str.find("float");
-  end = raw_str.length() - offset - 5;
-  return "float";
-}
-
 template <typename T>
-constexpr std::string_view get_name(unsigned&, unsigned&) noexcept {
-  unsigned offset{};
-  unsigned end{};
-  get_name<float>(offset, end);
+constexpr std::string_view get_name(unsigned& offset, unsigned& end) noexcept {
+  if constexpr (std::is_same_v<T, VOLT_FALLBACK_TYPE>) {
+    std::string_view raw_str = VOLT_FUNCNAME;
+    offset = raw_str.find(VOLT_XSTRINGIFY(VOLT_FALLBACK_TYPE));
+    end = raw_str.length() - offset -
+          std::string_view(VOLT_XSTRINGIFY(VOLT_FALLBACK_TYPE)).length();
+    return VOLT_XSTRINGIFY(VOLT_FALLBACK_TYPE);
 
-  std::string_view raw_str = VOLT_FUNCNAME;
+  } else {
+    get_name<VOLT_FALLBACK_TYPE>(offset, end);
 
-  auto retval = raw_str.substr(offset);
-  retval.remove_suffix(end);
-  return retval;
+    std::string_view raw_str = VOLT_FUNCNAME;
+
+    auto retval = std::string_view(VOLT_FUNCNAME + offset);
+    retval.remove_suffix(end);
+    return retval;
+  }
 }
 }  // namespace reflect_detail
 
@@ -63,5 +66,7 @@ constexpr std::string_view type_name() noexcept {
 }  // namespace volt
 
 #undef VOLT_FUNCNAME
+#undef VOLT_XSTRINGIFY
+#undef VOLT_STRINGIFY
 
 #endif  // VOLT_TYPE_NAME_HPP_

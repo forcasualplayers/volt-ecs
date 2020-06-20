@@ -5,7 +5,7 @@
 //
 #include <iostream>
 
-#include "../volt/reflect/type_id.hpp"
+#include "../include/volt/reflect/type_id.hpp"
 
 struct test_struct {
   int i;
@@ -43,6 +43,10 @@ void test_type_id() {
   static_assert(int_id == static_type_id<int>(),
                 "same id should remain the same");
   static_assert(int_id != float_id,
+                "different types should have different ids");
+  static_assert(test_struct_id != int_id,
+                "different types should have different ids");
+  static_assert(test_struct_id != float_id,
                 "different types should have different ids");
 }
 

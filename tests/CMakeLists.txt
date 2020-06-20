@@ -4,4 +4,5 @@ add_executable(reflection_testlib test_reflection.cc)
 
 target_compile_features(reflection_testlib PRIVATE cxx_std_17)
 target_link_libraries(reflection_testlib volt_ecs)
+target_link_libraries(reflection_testlib Catch2)
 add_test(NAME reflection_test COMMAND reflection_testlib)

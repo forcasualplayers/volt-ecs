@@ -3,7 +3,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for
 // details.
 //
+#define CATCH_CONFIG_MAIN
+
+#include <catch2/catch.hpp>
 #include <iostream>
+#include <vector>
 #include <volt/reflect/type_id.hpp>
 
 struct test_struct {
@@ -11,45 +15,84 @@ struct test_struct {
   float f;
 };
 
-void test_type_name() {
-  using namespace volt;
+namespace scope {
+struct scoped_test_struct {};
+}  // namespace scope
 
-  constexpr auto float_name = type_name<float>();
-  constexpr auto int_name = type_name<int>();
-  constexpr auto test_struct_name = type_name<test_struct>();
+namespace {
+struct anon_test_struct {};
+}  // namespace
 
-  static_assert(float_name == "float");
-  static_assert(int_name == "int");
-  static_assert(type_name<double>() == "double");
-  static_assert(type_name<void>() == "void");
+TEST_CASE("Compile-time type_name retrieval", "[type_name]") {
+  constexpr auto float_name = volt::type_name<float>();
+  constexpr auto int_name = volt::type_name<int>();
+  constexpr auto struct_name = volt::type_name<test_struct>();
+  constexpr auto scoped_struct_name =
+      volt::type_name<scope::scoped_test_struct>();
+  constexpr auto anon_struct_name = volt::type_name<anon_test_struct>();
 
-  std::cout << float_name << "\n";
-  std::cout << int_name << "\n";
-  std::cout << test_struct_name << "\n";
+  SECTION("Equality of basic types") {
+    REQUIRE(volt::type_name<float>() == "float");
+    REQUIRE(volt::type_name<int>() == "int");
+    REQUIRE(volt::type_name<double>() == "double");
+    REQUIRE(volt::type_name<void>() == "void");
+  }
+
+  SECTION("Non-basic types compilability") {
+    REQUIRE(volt::type_name<test_struct>() == volt::type_name<test_struct>());
+    REQUIRE(volt::type_name<scope::scoped_test_struct>() ==
+            volt::type_name<scope::scoped_test_struct>());
+  }
+
+  std::vector<std::string_view> type_names{
+      volt::type_name<float>(),
+      volt::type_name<int>(),
+      volt::type_name<double>(),
+      volt::type_name<void>(),
+      volt::type_name<test_struct>(),
+      volt::type_name<scope::scoped_test_struct>(),
+  };
+
+  SECTION("Inequality of types") {
+    REQUIRE(std::unique(type_names.begin(), type_names.end()) ==
+            type_names.end());
+  }
 }
 
-void test_type_id() {
-  using namespace volt;
-  constexpr type_id default_id;
-  constexpr type_id default_id_constructed{};
+TEST_CASE("Compile-time type id", "[type_id]") {
+  constexpr auto float_id = volt::static_type_id<float>();
+  constexpr auto int_id = volt::static_type_id<int>();
+  constexpr auto double_id = volt::static_type_id<double>();
+  constexpr auto void_id = volt::static_type_id<void>();
+  constexpr auto struct_id = volt::static_type_id<test_struct>();
+  constexpr auto scoped_struct_id =
+      volt::static_type_id<scope::scoped_test_struct>();
+  constexpr auto anon_struct_id = volt::static_type_id<anon_test_struct>();
 
-  static_assert(default_id == default_id_constructed);
+  SECTION("Equality of basic types") {
+    REQUIRE(volt::static_type_id<float>() == float_id);
+    REQUIRE(volt::static_type_id<int>() == int_id);
+    REQUIRE(volt::static_type_id<double>() == double_id);
+    REQUIRE(volt::static_type_id<void>() == void_id);
+  }
 
-  constexpr type_id int_id = static_type_id<int>();
-  constexpr type_id float_id = static_type_id<float>();
-  constexpr type_id test_struct_id = static_type_id<test_struct>();
+  SECTION("Non-basic types compilability") {
+    REQUIRE(volt::static_type_id<test_struct>() ==
+            volt::static_type_id<test_struct>());
+    REQUIRE(volt::static_type_id<scope::scoped_test_struct>() ==
+            volt::static_type_id<scope::scoped_test_struct>());
+  }
 
-  static_assert(int_id == static_type_id<int>(),
-                "same id should remain the same");
-  static_assert(int_id != float_id,
-                "different types should have different ids");
-  static_assert(test_struct_id != int_id,
-                "different types should have different ids");
-  static_assert(test_struct_id != float_id,
-                "different types should have different ids");
-}
+  std::vector<volt::type_id> type_ids{
+      volt::static_type_id<float>(),
+      volt::static_type_id<int>(),
+      volt::static_type_id<double>(),
+      volt::static_type_id<void>(),
+      volt::static_type_id<test_struct>(),
+      volt::static_type_id<scope::scoped_test_struct>(),
+  };
 
-int main() {
-  test_type_name();
-  test_type_id();
+  SECTION("Inequality of types") {
+    REQUIRE(std::unique(type_ids.begin(), type_ids.end()) == type_ids.end());
+  }
 }

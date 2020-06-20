@@ -4,8 +4,7 @@
 // details.
 //
 #include <iostream>
-
-#include "../include/volt/reflect/type_id.hpp"
+#include <volt/reflect/type_id.hpp>
 
 struct test_struct {
   int i;

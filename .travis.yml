@@ -1,0 +1,54 @@
+language: cpp
+
+matrix:
+  include:
+    - name: Clang 10.0
+      compiler: clang
+      os: linux
+      addons:
+        apt:
+          sources:
+            - sourceline: 'deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-10 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+          packages:
+            - libc++abi-10-dev
+            - libc++abi1-10
+            - libc++1-10
+            - libc++-10-dev
+            - libclang-cpp10 
+            - libllvm10 
+            - libclang-common-10-dev
+            - libclang1-10
+            - clang-10
+            - ninja-build
+      env:
+         - CC=clang-10
+         - CXX=clang++-10
+         - CC_FOR_BUILD=clang-10
+         - CXX_FOR_BUILD=clang++-10
+
+    - name: GCC 9
+      compiler: gcc
+      os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-9
+            - ninja-build
+      env:
+         - CC=gcc-9
+         - CXX=g++-9
+         - CC_FOR_BUILD=gcc-9
+         - CXX_FOR_BUILD=g++-9
+
+before_script:
+  - eval "${MATRIX_EVAL}"
+  - mkdir build
+  - cd build
+  - cmake -GNinja ..
+  - ninja
+
+script:
+  - ctest

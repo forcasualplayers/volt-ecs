@@ -2,7 +2,7 @@ language: cpp
 
 matrix:
   include:
-    - name: Clang 10.0
+    - name: Linux / Clang 10.0
       compiler: clang
       os: linux
       addons:
@@ -27,7 +27,7 @@ matrix:
          - CC_FOR_BUILD=clang-10
          - CXX_FOR_BUILD=clang++-10
 
-    - name: GCC 9
+    - name: Linux / GCC 9
       compiler: gcc
       os: linux
       addons:
@@ -43,8 +43,39 @@ matrix:
          - CC_FOR_BUILD=gcc-9
          - CXX_FOR_BUILD=g++-9
 
+    - name: Windows / Visual Studio 16 2019 / Debug
+      os: windows
+      compiler: cl
+      before_install:
+        - choco install visualstudio2019community
+        - choco install visualstudio2019-workload-nativedesktop 
+        - choco install ninja
+        - export VS160COMNTOOLS="/c/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/Tools"
+      before_script:
+        - mkdir build
+        - cd build
+        - cmake -A x64 ..
+      script:
+        - '"/c/Program Files (x86)/Microsoft Visual Studio/2019/Community/MSBuild/Current/Bin/MSBuild.exe" volt_ecs.sln -p:Configuration=Debug -v:q'
+        - ctest -C Debug
+        
+    - name: Windows / Visual Studio 16 2019 / Release
+      os: windows
+      compiler: cl
+      before_install:
+        - choco install visualstudio2019community
+        - choco install visualstudio2019-workload-nativedesktop 
+        - choco install ninja
+        - export VS160COMNTOOLS="/c/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/Tools" 
+      before_script:
+        - mkdir build
+        - cd build
+        - cmake -A x64 ..
+      script:
+        - '"/c/Program Files (x86)/Microsoft Visual Studio/2019/Community/MSBuild/Current/Bin/MSBuild.exe" volt_ecs.sln -p:Configuration=Release -v:q'
+        - ctest -C Release
+
 before_script:
-  - eval "${MATRIX_EVAL}"
   - mkdir build
   - cd build
   - cmake -GNinja ..

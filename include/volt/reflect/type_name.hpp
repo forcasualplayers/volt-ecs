@@ -19,10 +19,10 @@ constexpr std::string_view type_name() noexcept;
  * Inline implementations below this line
  *****************************************************************************/
 
-#if defined(__clang_major__)
-#define VOLT_FUNCNAME __PRETTY_FUNCTION__
-#elif defined(_MSC_VER)
+#if defined(_MSC_VER)
 #define VOLT_FUNCNAME __FUNCSIG__
+#elif defined(__clang_major__)
+#define VOLT_FUNCNAME __PRETTY_FUNCTION__
 #elif defined(__GNUC__)
 #define VOLT_FUNCNAME __PRETTY_FUNCTION__
 #endif
@@ -40,15 +40,17 @@ template <typename T>
 constexpr std::string_view get_name(unsigned& offset, unsigned& end) noexcept {
   if constexpr (std::is_same_v<T, VOLT_FALLBACK_TYPE>) {
     std::string_view raw_str = VOLT_FUNCNAME;
-    offset = raw_str.find(VOLT_XSTRINGIFY(VOLT_FALLBACK_TYPE));
-    end = raw_str.length() - offset -
-          std::string_view(VOLT_XSTRINGIFY(VOLT_FALLBACK_TYPE)).length();
+    offset = static_cast<unsigned>(
+        raw_str.find(VOLT_XSTRINGIFY(VOLT_FALLBACK_TYPE)));
+    end = static_cast<unsigned>(
+        raw_str.length() - offset -
+        std::string_view(VOLT_XSTRINGIFY(VOLT_FALLBACK_TYPE)).length());
     return VOLT_XSTRINGIFY(VOLT_FALLBACK_TYPE);
 
   } else {
     get_name<VOLT_FALLBACK_TYPE>(offset, end);
 
-    auto retval = std::string_view(VOLT_FUNCNAME + offset);
+    std::string_view retval = VOLT_FUNCNAME + offset;
     retval.remove_suffix(end);
     return retval;
   }
@@ -64,7 +66,5 @@ constexpr std::string_view type_name() noexcept {
 }  // namespace volt
 
 #undef VOLT_FUNCNAME
-#undef VOLT_XSTRINGIFY
-#undef VOLT_STRINGIFY
 
 #endif  // VOLT_TYPE_NAME_HPP_

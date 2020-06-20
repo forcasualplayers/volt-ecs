@@ -6,7 +6,7 @@ target_compile_options(reflection_testlib PRIVATE
   $<$<CXX_COMPILER_ID:GNU>:-Wall -Wextra -pedantic -Werror>
 )
 
-if (UNIX)
+if (LINUX)
 target_compile_options(reflection_testlib PRIVATE
   $<$<CXX_COMPILER_ID:Clang>:-Wall -Wextra -Werror -stdlib=libc++>
 )

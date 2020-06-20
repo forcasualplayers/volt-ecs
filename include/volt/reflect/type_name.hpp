@@ -66,5 +66,7 @@ constexpr std::string_view type_name() noexcept {
 }  // namespace volt
 
 #undef VOLT_FUNCNAME
+#undef VOLT_XSTRINGIFY
+#undef VOLT_STRINGIFY
 
 #endif  // VOLT_TYPE_NAME_HPP_

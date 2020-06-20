@@ -48,8 +48,6 @@ constexpr std::string_view get_name(unsigned& offset, unsigned& end) noexcept {
   } else {
     get_name<VOLT_FALLBACK_TYPE>(offset, end);
 
-    std::string_view raw_str = VOLT_FUNCNAME;
-
     auto retval = std::string_view(VOLT_FUNCNAME + offset);
     retval.remove_suffix(end);
     return retval;

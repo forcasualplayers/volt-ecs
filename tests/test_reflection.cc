@@ -78,10 +78,10 @@ TEST_CASE("Compile-time type id", "[type_id]") {
   }
 
   SECTION("Non-basic types compilability") {
-    REQUIRE(volt::static_type_id<test_struct>() ==
-            volt::static_type_id<test_struct>());
+    REQUIRE(volt::static_type_id<test_struct>() == struct_id);
     REQUIRE(volt::static_type_id<scope::scoped_test_struct>() ==
-            volt::static_type_id<scope::scoped_test_struct>());
+            scoped_struct_id);
+    REQUIRE(volt::static_type_id<anon_test_struct>() == anon_struct_id);
   }
 
   std::vector<volt::type_id> type_ids{

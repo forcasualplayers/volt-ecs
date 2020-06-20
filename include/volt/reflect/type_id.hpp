@@ -48,7 +48,7 @@ class type_id_hash {
  *****************************************************************************/
 namespace volt {
 
-constexpr type_id::type_id() noexcept : value_{} {};
+constexpr type_id::type_id() noexcept : value_{} {}
 
 constexpr type_id::type_id(rep_t val) noexcept : value_{val} {}
 

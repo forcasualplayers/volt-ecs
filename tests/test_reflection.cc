@@ -5,7 +5,7 @@
 //
 #include <iostream>
 
-#include "../include/reflect/type_id.hpp"
+#include "../volt/reflect/type_id.hpp"
 
 struct test_struct {
   int i;
@@ -32,6 +32,10 @@ void test_type_name() {
 void test_type_id() {
   using namespace volt;
   constexpr type_id default_id;
+  constexpr type_id default_id_constructed{};
+
+  static_assert(default_id == default_id_constructed);
+
   constexpr type_id int_id = static_type_id<int>();
   constexpr type_id float_id = static_type_id<float>();
   constexpr type_id test_struct_id = static_type_id<test_struct>();

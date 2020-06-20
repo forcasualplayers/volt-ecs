@@ -24,12 +24,13 @@ struct anon_test_struct {};
 }  // namespace
 
 TEST_CASE("Compile-time type_name retrieval", "[type_name]") {
-  constexpr auto float_name = volt::type_name<float>();
-  constexpr auto int_name = volt::type_name<int>();
-  constexpr auto struct_name = volt::type_name<test_struct>();
-  constexpr auto scoped_struct_name =
+  [[maybe_unused]] constexpr auto float_name = volt::type_name<float>();
+  [[maybe_unused]] constexpr auto int_name = volt::type_name<int>();
+  [[maybe_unused]] constexpr auto struct_name = volt::type_name<test_struct>();
+  [[maybe_unused]] constexpr auto scoped_struct_name =
       volt::type_name<scope::scoped_test_struct>();
-  constexpr auto anon_struct_name = volt::type_name<anon_test_struct>();
+  [[maybe_unused]] constexpr auto anon_struct_name =
+      volt::type_name<anon_test_struct>();
 
   SECTION("Equality of basic types") {
     REQUIRE(volt::type_name<float>() == "float");

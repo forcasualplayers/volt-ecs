@@ -15,10 +15,6 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   include(CTest)
 endif()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  set( CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -stdlib=libc++")
-endif()
-
 # variables
 set(VOLT_ECS_TARGET_NAME  ${PROJECT_NAME})
 set(VOLT_ECS_INCLUDE_DIR  include/)

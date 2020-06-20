@@ -83,3 +83,8 @@ before_script:
 
 script:
   - ctest
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always

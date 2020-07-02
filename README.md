@@ -1,6 +1,6 @@
 # volt.ecs 
 
-[![Build Status](https://travis-ci.com/forcasualplayers/volt.ecs.svg?branch=main)](https://travis-ci.com/forcasualplayers/volt.ecs)
+[![Build Status](https://travis-ci.com/forcasualplayers/volt-ecs.svg?branch=main)](https://travis-ci.com/forcasualplayers/volt-ecs)
 
 A header-only Entity-Component-System written in C++17/20 for the voltech engine.
 

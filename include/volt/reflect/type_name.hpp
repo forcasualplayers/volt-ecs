@@ -12,7 +12,7 @@
 
 namespace volt {
 template <typename T>
-constexpr std::string_view type_name() noexcept;
+constexpr auto type_name() noexcept -> std::string_view;
 }  // namespace volt
 
 /*****************************************************************************
@@ -34,10 +34,12 @@ constexpr std::string_view type_name() noexcept;
 namespace volt {
 namespace reflect_detail {
 template <typename T>
-constexpr std::string_view get_name(unsigned& offset, unsigned& end) noexcept;
+constexpr auto get_name(unsigned& offset, unsigned& end) noexcept
+    -> std::string_view;
 
 template <typename T>
-constexpr std::string_view get_name(unsigned& offset, unsigned& end) noexcept {
+constexpr auto get_name(unsigned& offset, unsigned& end) noexcept
+    -> std::string_view {
   if constexpr (std::is_same_v<T, VOLT_FALLBACK_TYPE>) {
     std::string_view raw_str = VOLT_FUNCNAME;
     offset = static_cast<unsigned>(
@@ -58,7 +60,7 @@ constexpr std::string_view get_name(unsigned& offset, unsigned& end) noexcept {
 }  // namespace reflect_detail
 
 template <typename T>
-constexpr std::string_view type_name() noexcept {
+constexpr auto type_name() noexcept -> std::string_view {
   unsigned offset{};
   unsigned end{};
   return reflect_detail::get_name<T>(offset, end);

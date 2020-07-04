@@ -18,27 +18,30 @@ class type_id {
   constexpr type_id() noexcept;
 
  private:
-  rep_t value_;
+  rep_t value_{};
 
   constexpr explicit type_id(rep_t val) noexcept;
 
-  friend constexpr bool operator==(type_id, type_id) noexcept;
-  friend constexpr bool operator!=(type_id, type_id) noexcept;
-  friend constexpr bool operator<(type_id, type_id) noexcept;
-  friend constexpr bool operator<=(type_id, type_id) noexcept;
-  friend constexpr bool operator>(type_id, type_id) noexcept;
-  friend constexpr bool operator>=(type_id, type_id) noexcept;
+  friend constexpr auto operator==(type_id lhs, type_id rhs) noexcept -> bool;
+  friend constexpr auto operator!=(type_id lhs, type_id rhs) noexcept -> bool;
+  friend constexpr auto operator<(type_id lhs, type_id rhs) noexcept -> bool;
+  friend constexpr auto operator<=(type_id lhs, type_id rhs) noexcept -> bool;
+  friend constexpr auto operator>(type_id lhs, type_id rhs) noexcept -> bool;
+  friend constexpr auto operator>=(type_id lhs, type_id rhs) noexcept -> bool;
 
   friend class type_id_hash;
 
   template <typename T>
-  friend constexpr type_id static_type_id() noexcept;
-  friend constexpr type_id dynamic_type_id(std::string_view) noexcept;
+  friend constexpr auto static_type_id() noexcept -> type_id;
+  friend constexpr auto dynamic_type_id(std::string_view str_id) noexcept
+      -> type_id;
 };
 
 class type_id_hash {
  public:
-  constexpr size_t operator()(type_id id) const noexcept { return id.value_; }
+  constexpr auto operator()(type_id id) const noexcept -> size_t {
+    return id.value_;
+  }
 };
 
 }  // namespace volt
@@ -48,18 +51,18 @@ class type_id_hash {
  *****************************************************************************/
 namespace volt {
 
-constexpr type_id::type_id() noexcept : value_{} {}
+constexpr type_id::type_id() noexcept = default;
 
 constexpr type_id::type_id(rep_t val) noexcept : value_{val} {}
 
-constexpr type_id dynamic_type_id(std::string_view str_id) noexcept {
+constexpr auto dynamic_type_id(std::string_view str_id) noexcept -> type_id {
   // FNV-1a hash
   constexpr size_t offset_basis = 0xcbf29ce484222325;
   constexpr size_t prime = 0x100000001b3;
 
   size_t hash = offset_basis;
 
-  for (auto& elem : str_id) {
+  for (const auto& elem : str_id) {
     hash *= prime;
     hash |= elem;
   }
@@ -68,26 +71,26 @@ constexpr type_id dynamic_type_id(std::string_view str_id) noexcept {
 }
 
 template <typename T>
-constexpr type_id static_type_id() noexcept {
+constexpr auto static_type_id() noexcept -> type_id {
   return dynamic_type_id(type_name<T>());
 }
 
-constexpr bool operator==(type_id lhs, type_id rhs) noexcept {
+constexpr auto operator==(type_id lhs, type_id rhs) noexcept -> bool {
   return lhs.value_ == rhs.value_;
 }
-constexpr bool operator!=(type_id lhs, type_id rhs) noexcept {
+constexpr auto operator!=(type_id lhs, type_id rhs) noexcept -> bool {
   return lhs.value_ != rhs.value_;
 }
-constexpr bool operator<=(type_id lhs, type_id rhs) noexcept {
+constexpr auto operator<=(type_id lhs, type_id rhs) noexcept -> bool {
   return lhs.value_ <= rhs.value_;
 }
-constexpr bool operator<(type_id lhs, type_id rhs) noexcept {
+constexpr auto operator<(type_id lhs, type_id rhs) noexcept -> bool {
   return lhs.value_ < rhs.value_;
 }
-constexpr bool operator>=(type_id lhs, type_id rhs) noexcept {
+constexpr auto operator>=(type_id lhs, type_id rhs) noexcept -> bool {
   return lhs.value_ >= rhs.value_;
 }
-constexpr bool operator>(type_id lhs, type_id rhs) noexcept {
+constexpr auto operator>(type_id lhs, type_id rhs) noexcept -> bool {
   return lhs.value_ > rhs.value_;
 }
 }  // namespace volt

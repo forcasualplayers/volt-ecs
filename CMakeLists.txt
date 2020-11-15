@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 
 project(volt_ecs
-  DESCRIPTION "An Entity-Component-System for C++17"
+  DESCRIPTION "An Entity-Component-System for C++20"
   LANGUAGES CXX)
 
 # includes
@@ -28,19 +28,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_MODULE_PATH cmake/)
 
+file(GLOB_RECURSE SRC "${VOLT_ECS_SOURCE_DIR}*.cc")
+
 # create project
 add_library(
   ${VOLT_ECS_TARGET_NAME} 
   SHARED
-  ${VOLT_ECS_SOURCE_DIR}volt/reflect/variant.cc
-  ${VOLT_ECS_SOURCE_DIR}volt/reflect/property.cc
+  ${SRC}
 )
 
 ## compiler flags
-#target_compile_features(${VOLT_ECS_TARGET_NAME} INTERFACE cxx_std_20)
 
 # setup include hierarchy
 target_include_directories(${VOLT_ECS_TARGET_NAME} INTERFACE ${VOLT_ECS_INCLUDE_DIR})
+target_link_libraries(${VOLT_ECS_TARGET_NAME})
 
 if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR MODERN_CMAKE_BUILD_TESTING) AND BUILD_TESTING)
     add_subdirectory(ext/Catch2)

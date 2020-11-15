@@ -10,6 +10,7 @@
 #include <vector>
 #include <volt/reflect/property.hpp>
 #include <volt/reflect/type_id.hpp>
+#include <volt/reflect/type_meta.hpp>
 #include <volt/reflect/variant.hpp>
 
 struct test_struct {
@@ -121,6 +122,16 @@ TEST_CASE("Test variant", "[variant]") {
     REQUIRE(int_variant.get_if<int>());
     REQUIRE(*int_variant.get_if<int>() == 1);
     REQUIRE(int_variant.get_if<float>() == nullptr);
+
+    auto int_variant_copy = int_variant;
+    REQUIRE(int_variant_copy.valid() == true);
+    REQUIRE(int_variant_copy.contains_value() == true);
+    REQUIRE(int_variant_copy.contains_reference() == false);
+    REQUIRE(int_variant_copy.contains_const() == false);
+    REQUIRE(int_variant_copy.id() == volt::static_type_id<int>());
+    REQUIRE(int_variant_copy.get_if<int>());
+    REQUIRE(*int_variant_copy.get_if<int>() == 1);
+    REQUIRE(int_variant_copy.get_if<float>() == nullptr);
   }
 
   int i = 2;
@@ -134,6 +145,13 @@ TEST_CASE("Test variant", "[variant]") {
     REQUIRE(int_ref_variant.get_if<int>());
     REQUIRE(*int_ref_variant.get_if<int>() == 2);
     REQUIRE(int_ref_variant.get_if<float>() == nullptr);
+    i = 3;
+    REQUIRE(*int_ref_variant.get_if<int>() == 3);
+    REQUIRE(int_ref_variant.get_if<float>() == nullptr);
+
+    auto int_ref_variant_copy = int_ref_variant;
+    REQUIRE(*int_ref_variant_copy.get_if<int>() == 3);
+    REQUIRE(int_ref_variant_copy.get_if<float>() == nullptr);
   }
 
   const int ci = 3;
@@ -152,7 +170,7 @@ TEST_CASE("Test variant", "[variant]") {
   }
 }
 
-TEST_CASE("Test properties", "property") {
+TEST_CASE("Test properties", "[property]") {
   struct Vector {
     float x, y, z;
   };
@@ -182,5 +200,43 @@ TEST_CASE("Test properties", "property") {
     x_prop.set_value(vector_variant, 6.f);
     REQUIRE(v.x == 6);
     REQUIRE(*x_prop.get_value(vector_variant).get_if<float>() == 6);
+  }
+}
+
+TEST_CASE("Test type_meta", "[type meta]") {
+  struct TestStruct {
+    int i;
+    float f;
+  };
+
+  volt::reflect::type_meta meta{volt::type_name<TestStruct>(),
+                                volt::static_type_id<TestStruct>(),
+                                alignof(TestStruct), sizeof(TestStruct)};
+  meta.register_property(volt::reflect::property{"i", &TestStruct::i});
+  meta.register_property(volt::reflect::property{"f", &TestStruct::f});
+
+  SECTION("Check attributes") {
+    REQUIRE(meta.align() == alignof(TestStruct));
+    REQUIRE(meta.size() == sizeof(TestStruct));
+    REQUIRE(meta.name() == volt::type_name<TestStruct>());
+  }
+
+  TestStruct ts;
+  ts.i = int(5);
+  ts.f = 7.5f;
+
+  volt::reflect::variant var{ts};
+
+  for (const auto& prop : meta.properties()) {
+    auto val = prop.get_value(ts);
+    if (prop.name() == "i") {
+      auto* int_val = val.get_if<int>();
+      REQUIRE(int_val);
+      REQUIRE(*int_val == 5);
+    } else if (prop.name() == "f") {
+      auto* float_val = val.get_if<float>();
+      REQUIRE(float_val);
+      REQUIRE(*float_val == 7.5);
+    }
   }
 }

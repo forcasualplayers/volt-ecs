@@ -21,15 +21,23 @@ endif()
 
 # variables
 set(VOLT_ECS_TARGET_NAME  ${PROJECT_NAME})
-set(VOLT_ECS_INCLUDE_DIR  include/)
+set(VOLT_ECS_INCLUDE_DIR  src/)
+set(VOLT_ECS_SOURCE_DIR  src/)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_MODULE_PATH cmake/)
 
 # create project
-add_library(${VOLT_ECS_TARGET_NAME} INTERFACE)
+add_library(
+  ${VOLT_ECS_TARGET_NAME} 
+  SHARED
+  ${VOLT_ECS_SOURCE_DIR}volt/reflect/variant.cc
+  ${VOLT_ECS_SOURCE_DIR}volt/reflect/property.cc
+)
 
-# compiler flags
-target_compile_features(${VOLT_ECS_TARGET_NAME} INTERFACE cxx_std_17)
+## compiler flags
+#target_compile_features(${VOLT_ECS_TARGET_NAME} INTERFACE cxx_std_20)
 
 # setup include hierarchy
 target_include_directories(${VOLT_ECS_TARGET_NAME} INTERFACE ${VOLT_ECS_INCLUDE_DIR})

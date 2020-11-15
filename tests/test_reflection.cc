@@ -8,7 +8,9 @@
 #include <catch2/catch.hpp>
 #include <iostream>
 #include <vector>
+#include <volt/reflect/property.hpp>
 #include <volt/reflect/type_id.hpp>
+#include <volt/reflect/variant.hpp>
 
 struct test_struct {
   int i;
@@ -95,5 +97,90 @@ TEST_CASE("Compile-time type id", "[type_id]") {
 
   SECTION("Inequality of types") {
     REQUIRE(std::unique(type_ids.begin(), type_ids.end()) == type_ids.end());
+  }
+}
+
+TEST_CASE("Test variant", "[variant]") {
+  volt::reflect::variant v;
+  SECTION("Test empty variant") {
+    REQUIRE(v.valid() == false);
+    REQUIRE(v.contains_value() == false);
+    REQUIRE(v.contains_reference() == false);
+    REQUIRE(v.contains_const() == false);
+    REQUIRE(v.id() == volt::type_id{});
+    REQUIRE(v.get_if<int>() == nullptr);
+  }
+
+  volt::reflect::variant int_variant{1};
+  SECTION("Test int variant") {
+    REQUIRE(int_variant.valid() == true);
+    REQUIRE(int_variant.contains_value() == true);
+    REQUIRE(int_variant.contains_reference() == false);
+    REQUIRE(int_variant.contains_const() == false);
+    REQUIRE(int_variant.id() == volt::static_type_id<int>());
+    REQUIRE(int_variant.get_if<int>());
+    REQUIRE(*int_variant.get_if<int>() == 1);
+    REQUIRE(int_variant.get_if<float>() == nullptr);
+  }
+
+  int i = 2;
+  volt::reflect::variant int_ref_variant{i};
+  SECTION("Test int ref variant") {
+    REQUIRE(int_ref_variant.valid() == true);
+    REQUIRE(int_ref_variant.contains_value() == false);
+    REQUIRE(int_ref_variant.contains_reference() == true);
+    REQUIRE(int_ref_variant.contains_const() == false);
+    REQUIRE(int_ref_variant.id() == volt::static_type_id<int>());
+    REQUIRE(int_ref_variant.get_if<int>());
+    REQUIRE(*int_ref_variant.get_if<int>() == 2);
+    REQUIRE(int_ref_variant.get_if<float>() == nullptr);
+  }
+
+  const int ci = 3;
+  volt::reflect::variant const_int_ref_variant{ci};
+  SECTION("Test const int ref variant") {
+    REQUIRE(const_int_ref_variant.valid() == true);
+    REQUIRE(const_int_ref_variant.contains_value() == false);
+    REQUIRE(const_int_ref_variant.contains_reference() == true);
+    REQUIRE(const_int_ref_variant.contains_const() == true);
+    REQUIRE(const_int_ref_variant.id() == volt::static_type_id<int>());
+    REQUIRE(const_int_ref_variant.get_if<int>() == nullptr);
+    REQUIRE(*const_int_ref_variant.get_if<const int>() == 3);
+    REQUIRE(const_int_ref_variant.is<int>());
+    REQUIRE(const_int_ref_variant.is<const int>());
+    REQUIRE(const_int_ref_variant.get_if<float>() == nullptr);
+  }
+}
+
+TEST_CASE("Test properties", "property") {
+  struct Vector {
+    float x, y, z;
+  };
+  Vector v{1, 2, 3};
+  volt::reflect::variant vector_variant{v};
+  volt::reflect::property x_prop{"x", &Vector::x};
+
+  SECTION("Check property's properties") {
+    REQUIRE(x_prop.name() == "x");
+    REQUIRE(x_prop.type() == volt::static_type_id<float>());
+    REQUIRE(x_prop.declaring_type() == volt::static_type_id<Vector>());
+  }
+
+  SECTION("Check property getter") {
+    auto get_val = x_prop.get_value(vector_variant);
+    REQUIRE(get_val.id() == volt::static_type_id<float>());
+    REQUIRE(*get_val.get_if<float>() == 1);
+    v.x = 4;
+    REQUIRE(v.y == 2);
+    REQUIRE(v.z == 3);
+    REQUIRE(*get_val.get_if<float>() != 4);
+    REQUIRE(*x_prop.get_value(vector_variant).get_if<float>() == 4);
+  }
+
+  SECTION("Check property setter") {
+    v.x = 5;
+    x_prop.set_value(vector_variant, 6.f);
+    REQUIRE(v.x == 6);
+    REQUIRE(*x_prop.get_value(vector_variant).get_if<float>() == 6);
   }
 }
